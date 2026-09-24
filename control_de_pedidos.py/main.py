@@ -1,3 +1,9 @@
+import sqlite3
+
+from fastapi import APIRouter, HTTPException
+from schemas.pedidos_schema import pedidocreate, pedidoresponse
+
+
 try:
     from sqlalchemy import create_engine
     from sqlalchemy.orm import declarative_base, sessionmaker
@@ -29,4 +35,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
 
