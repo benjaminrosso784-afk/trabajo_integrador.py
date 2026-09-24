@@ -9,8 +9,7 @@ try:
     from sqlalchemy.orm import declarative_base, sessionmaker
 except ImportError as exc:
     raise RuntimeError(
-        "SQLAlchemy no está instalado. Instálalo con: pip install sqlalchemy"
-    ) from exc
+        ) from exc
 
 DATABASE_URL = "sqlite:///./orders.db"
 
