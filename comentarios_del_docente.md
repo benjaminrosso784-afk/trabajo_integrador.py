@@ -167,3 +167,26 @@ No se pide y **no suma**:
 2. `seed.py` con las 3 tablas: `productos`, `ventas` (con `producto_id`) y `egresos`.
 
 **Sobre el tema:** este proyecto no maneja stock, eso es de TiendaDB. Acá lo importante es el cierre de caja: total vendido, total por medio de pago, egresos y saldo del día.
+
+## 24/09
+
+**Lo que hay:** borraron `trabajo_integrador_1.py` y subieron dos archivos nuevos: `control_de_pedidos.py/main.py` (Benjamín) y `cierredecaja.py/trabajo.py` (Ignacio). Hay commits de los dos 👍, pero **ninguno de los dos archivos corre** y ninguno está donde tiene que estar.
+
+**Estructura del repo**
+- Sigue sin haber `main.py` en la raíz. Las dos carpetas se llaman con `.py` al final (`control_de_pedidos.py/`, `cierredecaja.py/`): una carpeta no lleva extensión. Borren las carpetas y dejen `main.py` y `seed.py` en la raíz.
+- El README está vacío.
+
+**`cierredecaja.py/trabajo.py`**
+- Parece pegado desde un chat: hay líneas cortadas a la mitad (`from fastapi import FastAPI,` y `HTTPException` en la línea siguiente), flechas `→` en vez de `->`, `true` en vez de `True`, `from enum import enum` en vez de `Enum`, `=` en vez de `==` en los `where`, un `;` en el `with`, y un `)` de más. Nada de eso lo entiende Python.
+- Usa **SQLModel**, que no es lo que se pide. La base va con **SQLAlchemy** (ver [guias/sqlalchemy_orm.md](guias/sqlalchemy_orm.md)).
+- La tabla `cierre` con turno, cigarrillos, gas y markup no es el alcance. Las tablas son `productos`, `ventas` (con `producto_id`) y `egresos`. El cierre de caja **no se guarda**: se calcula en `GET /caja/cierre?fecha=` sumando ventas y egresos del día.
+
+**`control_de_pedidos.py/main.py`**
+- Va por el lado correcto: usa `create_engine` y `sessionmaker` de SQLAlchemy 👍. Pero importa `schemas.pedidos_schema`, que no existe en el repo, así que rompe en la primera línea. Y `APIRouter` no hace falta (ya lo dije el 23/09).
+- La guía muestra la forma más simple: `Session(engine)` directo, sin `sessionmaker` ni `get_db`. Sigan ese ejemplo.
+- "Control de pedidos" tampoco es el tema: es cierre de caja.
+
+**Próximos pasos**
+1. Un solo `main.py` en la raíz que levante con `uvicorn main:app --reload` y abra `/docs`. Escríbanlo a mano, de a poco, probando cada vez.
+2. `seed.py` con SQLAlchemy: `productos`, `ventas` (con `producto_id` y `medio_pago`) y `egresos`, ~10 registros por tabla.
+3. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
