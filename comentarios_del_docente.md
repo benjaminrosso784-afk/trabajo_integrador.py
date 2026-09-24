@@ -22,6 +22,11 @@ Esto es lo que hay que entregar. Lo que no está acá, no se pide.
 - Repositorio en GitHub con commits de **todos** los integrantes.
 - API desplegada **en producción con Gunicorn** en Render, con URL pública y `/docs` funcionando (ver abajo).
 
+### Nombres en el código (criterio acordado con la cátedra de Inglés)
+- **Variables, funciones y clases en inglés**: `list_students`, `get_session`, `class Student(Base)`.
+- **Tablas, columnas, rutas y query params** quedan **como figuran en el alcance** (en español): son el contrato de la API. Ejemplo: `class Student(Base)` con `__tablename__ = "estudiantes"` y columna `anio_cursada`.
+- **Comentarios**: pueden estar en español mientras desarrollan, pero para la **entrega final** tienen que estar en inglés.
+
 ### Despliegue a producción (Render + Gunicorn)
 
 En tu compu desarrollás con `uvicorn main:app --reload`. En producción corre **Gunicorn** como administrador de procesos, con workers de Uvicorn adentro.
@@ -169,6 +174,8 @@ No se pide y **no suma**:
 **Sobre el tema:** este proyecto no maneja stock, eso es de TiendaDB. Acá lo importante es el cierre de caja: total vendido, total por medio de pago, egresos y saldo del día.
 
 ## 24/09
+
+**📌 Criterio de nombres.** Variables, funciones y clases en **inglés**; tablas, columnas y rutas como en el alcance; comentarios en inglés para la entrega final. Está detallado arriba en *Reglas comunes* y la guía ya lo aplica.
 
 **Lo que hay:** borraron `trabajo_integrador_1.py` y subieron dos archivos nuevos: `control_de_pedidos.py/main.py` (Benjamín) y `cierredecaja.py/trabajo.py` (Ignacio). Hay commits de los dos 👍, pero **ninguno de los dos archivos corre** y ninguno está donde tiene que estar.
 
