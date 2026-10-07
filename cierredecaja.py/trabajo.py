@@ -1,93 +1,106 @@
 from datetime import date, datetime
-from enum import enum
+from enum import Enum
 
-from fastapi import FastAPI,
-HTTPException
-from sqlmodel import Field, SQLModel, 
-Session, create_engine, select
+from fastapi import FastAPI, HTTPException
+from sqlmodel import Field, Session, SQLModel, create_engine, select
 
-# config del negocio
-
+# Business configuration
 MARKUP = 0.42
-
 FACTOR = MARKUP / (1 + MARKUP)
 
-class Turno(str, Enum):
+
+class Shift(str, Enum):
     morning = "morning"
     snap = "snap"
     afternoon = "afternoon"
     night = "night"
 
-    # tabla en la base
 
-    class cierre(SQLModel, table=true): 
-        id: int | None = Field(default=None,
-        primary_key=True)
-             fecha: date
-             turno: Turno
-             total_vendido: float
-             cigarrillos: float = 0
-             gas: float = 0
-             creado: datetime = 
-        Field(default_factory=datetime.now)
+# Database Model
+class RegisterClosure(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    date: date
+    shift: Shift
+    total_sales: float
+    cigarettes: float = 0.0
+    gas: float = 0.0
+    created_at: datetime = Field(default_factory=datetime.now)
 
-            @property
-            def base_gravable(self) → float:
+    @property
+    def taxable_base(self) -> float:
+        return max(0.0, self.total_sales - self.cigarettes - self.gas)
 
-                return max(0.0,
-            self.total_vendido - self.cigarillos -
-            self.gas) 
+    @property
+    def net_profit(self) -> float:
+        return round(self.taxable_base * FACTOR, 2)
 
-            @property
-            def ganancia_limpia(self) → float:
-                return round(self.base_gravable)
+# Database Setup
+engine = create_engine("sqlite:///caja.db", connect_args={"check_same_thread": False})
 
 
-                #base de datos
-
-engine = create_engine("sqlite:///
-caja.db")
-
-def crear_tablas():
+def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
-# app
 
-app = FastAPI(title="Cierre de caja - Bebidas Nachito")
+# FastAPI Application
+app = FastAPI(title="Cash Register Closure - Bebidas Nachito")
+
 
 @app.on_event("startup")
 def on_startup():
-    crear_tablas()
+    create_db_and_tables()
 
-# crear un cierre de caja
 
-@app.post("/cierres")
-def crear_cierre(cierre: Cierre):
-     with session(engine) as s:
-        s.add(cierre)
-        s.commit()
-        s.refresh(cierre)
+# 1. Create a register closure
+@app.post("/closures")
+def create_closure(closure: RegisterClosure):
+    with Session(engine) as session:
+        session.add(closure)
+        session.commit()
+        session.refresh(closure)
         return {
-            **cierre.model_dump(),
-            "ganancia_limpia":
-cierre.ganancia_limpia,
+            **closure.model_dump(),
+            "net_profit": closure.net_profit,
         }
-# listar / fecha o turno
 
-@app.get("/cierres")
-def listar_cierres(fecha: date | None =
-None, turno: turno | None = None):)
-    with Session(engine) as s;
-        query = select(cierre)
-        if fecha:
-            query =
-query.where(cierre.fecha = fecha)
-        if turno:
-            query = 
-query.where(cierre.turno = turno)
-        cierres = s.exec(query).all()
+
+# 2. List closures / Filter by date or shift
+@app.get("/closures")
+def list_closures(closure_date: date | None = None, shift: Shift | None = None):
+    with Session(engine) as session:
+        query = select(RegisterClosure)
+        if closure_date:
+            query = query.where(RegisterClosure.date == closure_date)
+        if shift:
+            query = query.where(RegisterClosure.shift == shift)
+
+        closures = session.exec(query).all()
         return [
-            {**c.model_dump(),
-"ganancia_limpia": c.ganancia_limpia}
+            {**c.model_dump(), "net_profit": c.net_profit}
+            for c in closures
         ]
-#total ganancia
+
+
+# 3. Daily summary report
+@app.get("/closures/day/{closure_date}")
+def get_daily_summary(closure_date: date):
+    with Session(engine) as session:
+        query = select(RegisterClosure).where(RegisterClosure.date == closure_date)
+        closures = session.exec(query).all()
+
+        if not closures:
+            raise HTTPException(status_code=404, detail="No closures recorded for this date")
+
+        total_sales = sum(c.total_sales for c in closures)
+        total_cigarettes = sum(c.cigarettes for c in closures)
+        total_gas = sum(c.gas for c in closures)
+        total_net_profit = sum(c.net_profit for c in closures)
+
+        return {
+            "date": closure_date,
+            "recorded_shifts": [c.shift for c in closures],
+            "total_sales": total_sales,
+            "cigarettes_to_restock": total_cigarettes,
+            "gas_to_restock": total_gas,
+            "net_profit": round(total_net_profit, 2),
+        }
