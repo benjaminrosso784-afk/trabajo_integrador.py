@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+uvicorn-worker
+gunicorn
+sqlalchemy
