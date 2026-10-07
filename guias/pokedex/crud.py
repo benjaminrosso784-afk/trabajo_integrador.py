@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
-from db import get_session, PokemonType, Pokemon
-from validation import validate_type, validate_pokemon
+from guias.pokedex.db import get_session, PokemonType, Pokemon
+from guias.pokedex.validation import validate_type, validate_pokemon
 
 
 # =====================================================
