@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 
-from db import create_tables
-import crud
+from guias.pokedex.db import create_tables
+import guias.pokedex.crud as crud
 
 
 def main():
