@@ -34,7 +34,6 @@ class RegisterClosure(SQLModel, table=True):
     def net_profit(self) -> float:
         return round(self.taxable_base * FACTOR, 2)
 
-
 # Database Setup
 engine = create_engine("sqlite:///caja.db", connect_args={"check_same_thread": False})
 
