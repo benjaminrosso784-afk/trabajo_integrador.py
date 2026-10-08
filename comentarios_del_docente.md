@@ -202,3 +202,46 @@ No se pide y **no suma**:
 1. Un solo `main.py` en la raíz que levante con `uvicorn main:app --reload` y abra `/docs`. Escríbanlo a mano, de a poco, probando cada vez.
 2. `seed.py` con SQLAlchemy: `productos`, `ventas` (con `producto_id` y `medio_pago`) y `egresos`, ~10 registros por tabla.
 3. `requirements.txt` con `fastapi`, `uvicorn`, `uvicorn-worker`, `gunicorn`, `sqlalchemy`.
+
+## 08/10
+
+**📌 Cambio de criterio: todo en inglés.** Ahora también las **tablas, columnas, rutas y query params** van en inglés, igual que el README, los docstrings y los mensajes de la API. Reemplaza lo dicho el 24/09; está detallado arriba en *Nombres en el código*. El alcance sigue listando los nombres en español solo como referencia.
+
+**📌 Guía nueva (opcional):** [guias/variables_de_entorno.md](guias/variables_de_entorno.md), para sacar la clave del código con un `.env`.
+
+**Lo que hay:** un salto enorme. 👍 Probé la API y **los 6 endpoints funcionan**: `GET /productos` con filtro, `GET /ventas/{id}` y `GET /productos/{id}/ventas` con su 404, `GET /egresos`, `GET /caja/cierre` (para el 2026-09-10 da 18.800 vendido, 14.000 de egresos y saldo 4.800) y `POST /egresos`. Sin clave o con clave mala responde 401. El seed carga 15 + 15 + 14 registros y no duplica si se corre dos veces. `main.py` y `seed.py` están en la raíz, `requirements.txt` está bien y hay commits de los dos.
+
+**⚠️ Tienen que poder explicar todo lo que está escrito.** El 24/09 ninguno de los dos archivos corría; ahora hay código con `APIKeyHeader`, `relationship(back_populates=...)`, `ilike` y `async def` con `await request.json()`, que no vimos en clase. No está mal usarlo, pero:
+- Si usaron IA, **declárenlo en el README**: es parte del alcance.
+- En la defensa les voy a preguntar por esas líneas a los dos. Si no pueden explicar qué hace una, reemplácenla por la forma que vimos en la guía.
+
+**A corregir en `main.py`**
+- **Nombres en inglés** (criterio nuevo). Las clases y funciones ya están bien; faltan tablas, columnas y rutas:
+
+  | Hoy | Tiene que ser |
+  |---|---|
+  | tablas `productos`, `ventas`, `egresos` | `products`, `sales`, `expenses` |
+  | columnas `nombre`, `categoria`, `precio`, `fecha`, `cantidad`, `medio_pago`, `concepto`, `monto`, `producto_id` | `name`, `category`, `price`, `date`, `quantity`, `payment_method`, `concept`, `amount`, `product_id` |
+  | `GET /productos?categoria=` | `GET /products?category=` |
+  | `GET /ventas/{id}` · `GET /productos/{id}/ventas` | `GET /sales/{id}` · `GET /products/{id}/sales` |
+  | `GET /egresos?fecha=` · `POST /egresos` | `GET /expenses?date=` · `POST /expenses` |
+  | `GET /caja/cierre?fecha=` | `GET /cash/closing?date=` |
+
+  También los docstrings y los mensajes de error. Como cambian los nombres de las tablas, borren `kiosko.db` y vuelvan a correr el seed.
+- El `POST /egresos` acepta cosas que no debería. Probé y entraron las dos:
+  - `"monto": true` se guarda como `1.0`. Hay que descartar los booleanos: `isinstance(monto, bool)`.
+  - `"fecha": "cualquiera"` se guarda tal cual. Validen el formato con `date.fromisoformat(fecha)` adentro de un `try/except ValueError`.
+- Falta el `try/except` para que la API no se caiga si la base no está o falla una consulta.
+- Todo está en un solo archivo. Funciona, pero queda más claro separar las clases y el `engine` en `db.py`, como en la guía. Hoy `seed.py` tiene que importar `main.py` para conseguir las tablas.
+
+**A corregir en el repo**
+- `kiosko.db` está subido. Agreguen `*.db` al `.gitignore` y sáquenlo con `git rm --cached kiosko.db`.
+- El **README está vacío**. Tiene que explicar (en inglés) qué hace la API, los 6 endpoints, cómo usar la clave, cómo correrla y la declaración de uso de IA.
+- Los mensajes de commit tienen que decir qué se hizo. Los 17 commits de esta semana se llaman "avance", "casi lito", "control_de_pedidos" o el nombre de un archivo.
+- Modificaron los imports de `guias/pokedex/`. Esa carpeta es material de la cátedra: déjenla como estaba.
+
+**Próximos pasos**
+1. Pasar tablas, columnas, rutas, docstrings y mensajes a inglés. Probar los 6 endpoints de nuevo en `/docs`.
+2. Arreglar las dos validaciones del `POST` y agregar el `try/except`.
+3. Sacar `kiosko.db` del repo y escribir el README.
+4. **Desplegar en Render.** Ya tienen todo para hacerlo; no lo dejen para el final.
