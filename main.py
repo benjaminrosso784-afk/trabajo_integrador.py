@@ -3,7 +3,6 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy import create_engine, select, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
-
 API_KEY = "clave-de-prueba-2026"
 header_scheme = APIKeyHeader(name="X-API-Key")
 
