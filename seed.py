@@ -12,28 +12,27 @@ def seed_database():
             print("Database already contains data. Skipping seed.")
             return
 
-        # 1. Productos
         products = [
-            Product(nombre="Coca Cola 500ml", categoria="bebidas", precio=1500.0),         # ID 1
-            Product(nombre="Agua Mineral 500ml", categoria="bebidas", precio=1000.0),      # ID 2
-            Product(nombre="Cerveza Quilmes 473ml", categoria="bebidas", precio=2200.0),    # ID 3
-            Product(nombre="Cerveza Quilmes 1L", categoria="bebidas", precio=2800.0),       # ID 4
-            Product(nombre="Alfajor Jorgito", categoria="golosinas", precio=800.0),        # ID 5
-            Product(nombre="Chocolate Milka", categoria="golosinas", precio=1800.0),       # ID 6
-            Product(nombre="Caramelos Flynn Paff", categoria="golosinas", precio=500.0),    # ID 7
-            Product(nombre="Chicles Beldent", categoria="golosinas", precio=600.0),        # ID 8
-            Product(nombre="Galletitas Oreo", categoria="galletitas", precio=1600.0),      # ID 9
-            Product(nombre="Papas Lays 100g", categoria="snacks", precio=2500.0),          # ID 10
-            Product(nombre="Doritos 90g", categoria="snacks", precio=2700.0),              # ID 11
-            Product(nombre="Cigarrillos Marlboro Box", categoria="cigarrillos", precio=3500.0), # ID 12
-            Product(nombre="Cigarrillos Philip Morris", categoria="cigarrillos", precio=3200.0),# ID 13
-            Product(nombre="Papas Fritas Lay's", categoria="snacks", precio=1800.0),       # ID 14
-            Product(nombre="Maní Salado", categoria="snacks", precio=900.0),              # ID 15
+            Product(nombre="Coca Cola 500ml", categoria="bebidas", precio=1500.0),         
+            Product(nombre="Agua Mineral 500ml", categoria="bebidas", precio=1000.0),      
+            Product(nombre="Cerveza Quilmes 473ml", categoria="bebidas", precio=2200.0),   
+            Product(nombre="Cerveza Quilmes 1L", categoria="bebidas", precio=2800.0),       
+            Product(nombre="Alfajor Jorgito", categoria="golosinas", precio=800.0),        
+            Product(nombre="Chocolate Milka", categoria="golosinas", precio=1800.0),       
+            Product(nombre="Caramelos Flynn Paff", categoria="golosinas", precio=500.0),   
+            Product(nombre="Chicles Beldent", categoria="golosinas", precio=600.0),       
+            Product(nombre="Galletitas Oreo", categoria="galletitas", precio=1600.0),      
+            Product(nombre="Papas Lays 100g", categoria="snacks", precio=2500.0),         
+            Product(nombre="Doritos 90g", categoria="snacks", precio=2700.0),             
+            Product(nombre="Cigarrillos Marlboro Box", categoria="cigarrillos", precio=3500.0), 
+            Product(nombre="Cigarrillos Philip Morris", categoria="cigarrillos", precio=3200.0),
+            Product(nombre="Papas Fritas Lay's", categoria="snacks", precio=1800.0),       
+            Product(nombre="Maní Salado", categoria="snacks", precio=900.0),         
         ]
         session.add_all(products)
         session.commit()
 
-        # 2. Ventas
+
         sales = [
             Sale(fecha="2026-09-10", cantidad=2, medio_pago="efectivo", total=3000.0, producto_id=1),
             Sale(fecha="2026-09-10", cantidad=1, medio_pago="debito", total=1000.0, producto_id=2),
@@ -53,7 +52,7 @@ def seed_database():
         ]
         session.add_all(sales)
 
-        # 3. Egresos
+
         expenses = [
             Expense(fecha="2026-09-10", concepto="Pago proveedor de hielo", monto=2000.0),
             Expense(fecha="2026-09-10", concepto="Compra de bolsas plasticas", monto=1500.0),

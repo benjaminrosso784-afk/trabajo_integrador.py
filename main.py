@@ -3,9 +3,9 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy import create_engine, select, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
-# ------------------------------------------------------------------------------
+
 # 1. Configuración de Seguridad
-# ------------------------------------------------------------------------------
+
 API_KEY = "clave-de-prueba-2026"
 header_scheme = APIKeyHeader(name="X-API-Key")
 
@@ -20,9 +20,9 @@ app = FastAPI(
     dependencies=[Depends(verify_api_key)],
 )
 
-# ------------------------------------------------------------------------------
+
 # 2. Base de Datos Única (kiosko.db) y Modelos ORM
-# ------------------------------------------------------------------------------
+
 DB_URL = "sqlite:///kiosko.db"
 engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
 
@@ -89,9 +89,8 @@ def expense_to_dict(expense: Expense) -> dict:
         "monto": expense.monto,
     }
 
-# ------------------------------------------------------------------------------
 # 3. Endpoints Nivel A
-# ------------------------------------------------------------------------------
+
 
 @app.get("/productos")
 def get_products(categoria: str = None):
