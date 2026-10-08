@@ -1,19 +1,21 @@
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from main import Base, Product, Sale, Expense, DB_URL
+import sqlite3
+from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, select
+from sqlalchemy.orm import DeclarativeBase, Session, relationship
 
 def seed_database():
     """Seeds the SQLite database with ~10 initial records per table if empty."""
     engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine)
 
+
     with Session(engine) as session:
-        # Prevent duplicated seeding
         if session.scalars(select(Product)).first() is not None:
             print("Database already contains data. Skipping seed.")
             return
 
-        # 10 Sample Products
         products = [
             Product(nombre="Coca Cola 500ml", categoria="bebidas", precio=1500.0),
             Product(nombre="Agua Mineral 500ml", categoria="bebidas", precio=1000.0),
@@ -29,7 +31,7 @@ def seed_database():
         session.add_all(products)
         session.commit()
 
-        # 10 Sample Sales
+
         sales = [
             Sale(fecha="2026-09-10", cantidad=2, medio_pago="efectivo", total=3000.0, producto_id=1),
             Sale(fecha="2026-09-10", cantidad=1, medio_pago="debito", total=1000.0, producto_id=2),
@@ -44,7 +46,7 @@ def seed_database():
         ]
         session.add_all(sales)
 
-        # 10 Sample Expenses
+
         expenses = [
             Expense(fecha="2026-09-10", concepto="Pago proveedor de hielo", monto=2000.0),
             Expense(fecha="2026-09-10", concepto="Compra de bolsas plasticas", monto=1500.0),
@@ -65,9 +67,6 @@ def seed_database():
 if __name__ == "__main__":
     seed_database()
 
-    import sqlite3
-from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, select
-from sqlalchemy.orm import DeclarativeBase, Session, relationship
 
 DATABASE_URL = "sqlite:///cierre_caja.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
