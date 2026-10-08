@@ -3,6 +3,7 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy import create_engine, select, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
+
 API_KEY = "clave-de-prueba-2026"
 header_scheme = APIKeyHeader(name="X-API-Key")
 
@@ -55,6 +56,7 @@ class Expense(Base):
 
 Base.metadata.create_all(bind=engine)
 
+
 def product_to_dict(product: Product) -> dict:
     return {
         "id": product.id,
@@ -81,13 +83,15 @@ def expense_to_dict(expense: Expense) -> dict:
         "monto": expense.monto,
     }
 
+# Endpoints
+
 @app.get("/productos")
 def get_products(categoria: str = None):
     """Devuelve todos los productos, opcionalmente filtrados por categoría."""
     with Session(engine) as session:
         query = select(Product)
         if categoria:
-            query = query.where(Product.categoria == categoria.lower())
+            query = query.where(Product.categoria.ilike(categoria))
         products = session.scalars(query).all()
         return [product_to_dict(p) for p in products]
 
