@@ -3,7 +3,9 @@ from fastapi.security import APIKeyHeader
 from sqlalchemy import create_engine, select, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
-
+# ------------------------------------------------------------------------------
+# 1. Configuración de Seguridad
+# ------------------------------------------------------------------------------
 API_KEY = "clave-de-prueba-2026"
 header_scheme = APIKeyHeader(name="X-API-Key")
 
@@ -18,6 +20,9 @@ app = FastAPI(
     dependencies=[Depends(verify_api_key)],
 )
 
+# ------------------------------------------------------------------------------
+# 2. Base de Datos Única (kiosko.db) y Modelos ORM
+# ------------------------------------------------------------------------------
 DB_URL = "sqlite:///kiosko.db"
 engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
 
@@ -54,9 +59,10 @@ class Expense(Base):
     concepto: Mapped[str] = mapped_column(nullable=False)
     monto: Mapped[float] = mapped_column(nullable=False)
 
+# Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
-
+# Funciones auxiliares de conversión a dict
 def product_to_dict(product: Product) -> dict:
     return {
         "id": product.id,
@@ -83,7 +89,9 @@ def expense_to_dict(expense: Expense) -> dict:
         "monto": expense.monto,
     }
 
-# Endpoints
+# ------------------------------------------------------------------------------
+# 3. Endpoints Nivel A
+# ------------------------------------------------------------------------------
 
 @app.get("/productos")
 def get_products(categoria: str = None):
@@ -151,7 +159,7 @@ def get_cash_closing(fecha: str):
 
 @app.post("/egresos", status_code=201)
 async def create_expense(request: Request):
-    """Crea un nuevo registro de egreso validando los datos del cuerpo JSON."""
+    """Crea un nuevo registro de egreso validando los datos del cuerpo JSON sin Pydantic."""
     try:
         data = await request.json()
     except Exception:
