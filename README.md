@@ -17,4 +17,4 @@ GET /cash-closing takes a date, for example date=2026-09-10, and calculates the 
 
 POST /expenses creates a new expense. The body needs a date, a concept and an amount. For example date 2026-09-10, concept Cleaning supplies and amount 3000.
 
-About the use of AI. As the course guidelines allow, we used AI tools (Gemini and ChatGPT) as coding assistants. We used them mainly to help structure the code, translate the documentation into English and sort out the JSON validation syntax. The business logic, the database relationships and the endpoints were checked, tested and understood by the whole team.
+About the use of AI. As the course guidelines allow, we used AI tools (nootboklm,claude and ChatGPT) as coding assistants. We used them mainly to help structure the code, translate the documentation into English and sort out the JSON validation syntax. The business logic, the database relationships and the endpoints were checked, tested and understood by the whole team.
