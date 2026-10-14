@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException
-from [enlace sospechoso eliminado] import APIKeyHeader
+from fastapi.security import APIKeyHeader
 
 API_KEY = "clave-de-prueba-2026"
 header_scheme = APIKeyHeader(name="X-API-Key")
