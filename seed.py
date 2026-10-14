@@ -7,7 +7,6 @@ def seed_database():
     Base.metadata.create_all(bind=engine)
 
     with Session(engine) as session:
-        # Evita sembrar dos veces si ya existen productos en kiosko.db
         if session.scalars(select(Product)).first() is not None:
             print("Database already contains data. Skipping seed.")
             return
