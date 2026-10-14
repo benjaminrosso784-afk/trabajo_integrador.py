@@ -230,7 +230,8 @@ No se pide y **no suma**:
   También los docstrings y los mensajes de error. Como cambian los nombres de las tablas, borren `kiosko.db` y vuelvan a correr el seed.
 - El `POST /egresos` acepta cosas que no debería. Probé y entraron las dos:
   - `"monto": true` se guarda como `1.0`. Hay que descartar los booleanos: `isinstance(monto, bool)`.
-  - `"fecha": "cualquiera"` se guarda tal cual. Validen el formato con `date.fromisoformat(fecha)` adentro de un `try/except ValueError`.
+  - `"
+    from "cualquiera"` se guarda tal cual. Validen el formato con `(fecha)` adentro de un `try/except ValueError`.
 - Falta el `try/except` para que la API no se caiga si la base no está o falla una consulta.
 - Todo está en un solo archivo. Funciona, pero queda más claro separar las clases y el `engine` en `db.py`, como en la guía. Hoy `seed.py` tiene que importar `main.py` para conseguir las tablas.
 

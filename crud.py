@@ -5,7 +5,7 @@ from database import engine, Product, Sale, Expense, product_to_dict, sale_to_di
 
 router = APIRouter()
 
-@add.get("/products")
+@router.get("/products")
 def get_products(category: str = None):
     """Retrieves all products, optionally filtered by category."""
     with Session(engine) as session:
@@ -15,7 +15,7 @@ def get_products(category: str = None):
         products = session.scalars(query).all()
         return [product_to_dict(p) for p in products]
 
-@add.get("/sales/{id}")
+@router.get("/sales/{id}")
 def get_sale(id: int):
     """Retrieves details of a specific sale by ID or 404 if not found."""
     with Session(engine) as session:
@@ -24,7 +24,7 @@ def get_sale(id: int):
             raise HTTPException(status_code=404, detail="Sale not found")
         return sale_to_dict(sale)
 
-@add.get("/products/{id}/sales")
+@router.get("/products/{id}/sales")
 def get_product_sales(id: int):
     """Retrieves all sales associated with a specific product ID."""
     with Session(engine) as session:
@@ -33,36 +33,30 @@ def get_product_sales(id: int):
             raise HTTPException(status_code=404, detail="Product not found")
         return [sale_to_dict(s) for s in product.sales]
 
-@add.get("/expenses")
+@router.get("/expenses")
 def get_expenses(date: str = None):
     """Retrieves all expenses, optionally filtered by date (YYYY-MM-DD)."""
     with Session(engine) as session:
         query = select(Expense)
         if date:
-            query = query.where([enlace sospechoso eliminado] == date)
+            query = query.where(Expense.date == date)
         expenses = session.scalars(query).all()
         return [expense_to_dict(e) for e in expenses]
 
-@add.get("/cash-closing")
+@router.get("/cash-closing")
 def get_cash_closing(date: str):
-    """Calculates daily cash closing metrics: total sales, payment method
-breakdown, total expenses, and net balance."""
+    """Calculates daily cash closing metrics: total sales, payment method breakdown, total expenses, and net balance."""
     with Session(engine) as session:
-        sales = session.scalars(select(Sale).where([enlace sospechoso eliminado]
-== date)).all()
-        expenses = session.scalars(select(Expense).where([enlace sospechoso
-eliminado] == date)).all()
+        sales = session.scalars(select(Sale).where(Sale.date == date)).all()
+        expenses = session.scalars(select(Expense).where(Expense.date == date)).all()
 
-        total_sales = sum([enlace sospechoso eliminado] for s in sales)
+        total_sales = sum(s.amount for s in sales)
         total_expenses = sum(e.amount for e in expenses)
 
         by_payment_method = {
-            "cash": round(sum([enlace sospechoso eliminado] for s in sales if
-s.payment_method == "cash"), 2),
-            "debit": round(sum([enlace sospechoso eliminado] for s in sales if
-s.payment_method == "debit"), 2),
-            "transfer": round(sum([enlace sospechoso eliminado] for s in sales if
-s.payment_method == "transfer"), 2),
+            "cash": round(sum(s.amount for s in sales if s.payment_method == "cash"), 2),
+            "debit": round(sum(s.amount for s in sales if s.payment_method == "debit"), 2),
+            "transfer": round(sum(s.amount for s in sales if s.payment_method == "transfer"), 2),
         }
 
         net_balance = total_sales - total_expenses
@@ -75,7 +69,7 @@ s.payment_method == "transfer"), 2),
             "daily_balance": round(net_balance, 2),
         }
 
-@add.post("/expenses", status_code=201)
+@router.post("/expenses", status_code=201)
 async def create_expense(request: Request):
     """Creates a new expense record with manual JSON parsing and validation."""
     try:
@@ -84,28 +78,23 @@ async def create_expense(request: Request):
         raise HTTPException(status_code=400, detail="Invalid JSON body")
 
     if not isinstance(data, dict):
-        raise HTTPException(status_code=400, detail="Request body must be a JSON
-object")
+        raise HTTPException(status_code=400, detail="Request body must be a JSON object")
 
     required_fields = ["date", "concept", "amount"]
     for field in required_fields:
         if field not in data:
-            raise HTTPException(status_code=400, detail=f"Missing required field:
-'{field}'")
+            raise HTTPException(status_code=400, detail=f"Missing required field: '{field}'")
 
     date = data.get("date")
     concept = data.get("concept")
     amount = data.get("amount")
 
     if not isinstance(date, str) or not date.strip():
-        raise HTTPException(status_code=400, detail="Field 'date' must be a valid
-non-empty string (YYYY-MM-DD)")
+        raise HTTPException(status_code=400, detail="Field 'date' must be a valid non-empty string (YYYY-MM-DD)")
     if not isinstance(concept, str) or not concept.strip():
-        raise HTTPException(status_code=400, detail="Field 'concept' must be a
-non-empty string")
+        raise HTTPException(status_code=400, detail="Field 'concept' must be a non-empty string")
     if not isinstance(amount, (int, float)) or amount <= 0:
-        raise HTTPException(status_code=400, detail="Field 'amount' must be a
-positive number greater than 0")
+        raise HTTPException(status_code=400, detail="Field 'amount' must be a positive number greater than 0")
 
     with Session(engine) as session:
         new_expense = Expense(

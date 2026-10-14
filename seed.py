@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from main import Base, Product, Sale, Expense, engine
+from models import engine, Product, Sale, Expense
+
 
 def seed_database():
     """Siembra la base de datos SQLite utilizando la misma conexión definida en main.py."""
