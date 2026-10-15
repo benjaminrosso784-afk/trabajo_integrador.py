@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import create_engine, event, ForeignKey, String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 
 DB_URL = "sqlite:///kiosko.db"
 engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
@@ -14,8 +14,7 @@ class Product(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     category: Mapped[str] = mapped_column(nullable=False)
     price: Mapped[float] = mapped_column(nullable=False)
-
-    sales: Mapped[list["Sale"]] = relationship(back_populates="product")
+    
 
 class Sale(Base):
     __tablename__ = "sales"
@@ -25,12 +24,19 @@ class Sale(Base):
     quantity: Mapped[int] = mapped_column(nullable=False)
     payment_method: Mapped[str] = mapped_column(nullable=False)
     total: Mapped[float] = mapped_column(nullable=False)
-    product_id: Mapped[int] = mapped_column(ForeignKey("[enlace sospechoso eliminado]"), nullable=False)
 
-    product: Mapped["Product"] = relationship(back_populates="sales")
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))    
 
 class Expense(Base):
     __tablename__ = "expenses"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    date: Mapped
+    date: Mapped[str] = mapped_column(nullable=False)
+    amount: Mapped[float] = mapped_column(nullable=False)
+    description: Mapped[str] = mapped_column(nullable=False)
+
+def create_tables():
+    Base.metadata.create_all(engine)
+
+def get_session() -> Session:
+    return Session(engine)
