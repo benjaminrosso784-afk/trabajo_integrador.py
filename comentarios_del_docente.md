@@ -289,3 +289,23 @@ Además, `main.py` no importa nada de lo que separaron: ni `engine`, ni los mode
 Antes de cada commit: `uvicorn main:app --reload`, abrir `/docs` y probar. Esta regresión se hubiera visto en un minuto.
 
 > En el commit `4b623b8` se modificó sin querer una línea de la devolución del 08/10. Ya la restauré.
+
+## 21/10 (entrega)
+
+**Lo que hay:** un solo commit desde el 15/10 (Ignacio, "savage"), que agrega en `db.py` la `relationship` entre `Product` y `Sale`. Está bien hecho y arregla `GET /products/{id}/sales`. 👍
+
+**⚠️ La API sigue sin endpoints.** `main.py` no cambió: el código entre las líneas 7 y 109 sigue **adentro de un string `'''`**, así que FastAPI no registra ninguna ruta. Todas dan 404, y la clave no se aplica porque `main.py` no importa `security.py`. Tal como está, en la defensa no hay nada que mostrar en `/docs`.
+
+**Lo mínimo para tener la demo andando el 28/10**, en este orden:
+1. **Sacar los dos `'''`** de `main.py` y agregar arriba los imports de lo que usa: `engine`, los modelos, los `*_to_dict` y `verify_api_key`. Proteger la app con `FastAPI(dependencies=[Depends(verify_api_key)])`. Con eso ya andan los endpoints 1 a 4, con sus 404.
+2. **Cierre de caja:** cambiar `s.amount` por `s.total` (líneas 53 y 57-59) y usar en el filtro los mismos medios de pago que el seed (`efectivo`, `debito`, `transferencia`). Hoy da 500.
+3. **`POST /expenses`:** la columna se llama `description`, no `concept` (línea 102). Hoy da 500 con datos válidos. De paso, rechacen los booleanos en `amount` y validen el formato de la fecha.
+4. **`try/except`** en las consultas.
+5. **README:**
+   - Los números del ejemplo del cierre no coinciden con el seed. Para el 2026-09-10 son: 18.800 vendido, 9.500 de egresos y saldo de 9.300.
+   - `?category=beverages` no existe: los datos dicen `bebidas`.
+   - Donde dice `concept` es `description`.
+
+**Commits.** Desde el 08/10, todos los commits salvo este último son de la cuenta de Rosso. Si trabajan juntos, aclárenlo en el mensaje (*pair coding*). En la defensa la nota es grupal y les vamos a preguntar a los dos.
+
+Antes de la defensa, levanten la API con `uvicorn main:app --reload` y prueben los 6 endpoints en `/docs`, en la notebook con la que van a presentar.
