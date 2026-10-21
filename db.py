@@ -14,7 +14,8 @@ class Product(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     category: Mapped[str] = mapped_column(nullable=False)
     price: Mapped[float] = mapped_column(nullable=False)
-    
+
+    sales: Mapped[list["Sale"]] = relationship(back_populates="product")
 
 class Sale(Base):
     __tablename__ = "sales"
@@ -27,6 +28,7 @@ class Sale(Base):
 
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))    
 
+    product: Mapped["Product"] = relationship(back_populates="sales")
 class Expense(Base):
     __tablename__ = "expenses"
 
