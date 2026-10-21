@@ -3,3 +3,4 @@ uvicorn
 uvicorn-worker
 gunicorn
 sqlalchemy
+python-dotenv

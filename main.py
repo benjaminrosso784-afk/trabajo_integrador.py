@@ -1,10 +1,9 @@
 import crud
+from security import verify_api_key
 
-from fastapi import FastAPI , HTTPException, Request
+from fastapi import FastAPI , HTTPException, Request, Depends
 
-app = FastAPI(
-    
-)
+app = FastAPI(title="Kiosco API", dependencies=[Depends(verify_api_key)])
 
 @app.get("/")
 def welcome():
@@ -22,7 +21,7 @@ def get_products(category: str = None):
         
 
 @app.get("/sales/{id}")
-def get_sale(id: int):
+def get_sale(id: int = None):
     """Retrieves details of a specific sale by ID or 404 if not found."""
     try:
         sale = crud.get_sale(id)
@@ -31,23 +30,22 @@ def get_sale(id: int):
         raise HTTPException(status_code=404, detail="Sale not found")
 
 @app.get("/products/{id}/sales")
-def get_product_sales(id: int):
+def get_product_sales(id: int = None):
     """Retrieves all sales associated with a specific product ID."""
     try:
         sales = crud.get_product_sales(id)
         return [crud.sale_to_dict(s) for s in sales]
     except:
-        raise HTTPException(status_code=404, detail="Product not found or no sales available")
-    
+        raise HTTPException(status_code=404, detail="Product not found ")
+  
 @app.get("/expenses")
 def get_expenses(date: str = None):
     """Retrieves all expenses, optionally filtered by date (YYYY-MM-DD)."""
-    with Session(engine) as session:
-        query = select(Expense)
-        if date:
-            query = query.where(Expense.date == date)
-        expenses = session.scalars(query).all()
-        return [expense_to_dict(e) for e in expenses]
+    try:
+        expenses = crud.get_expenses(date)
+        return [crud.expense_to_dict(e) for e in expenses]
+    except:
+        raise HTTPException(status_code=500, detail="Database error")
 
 @app.get("/cash-closing")
 def get_cash_closing(date: str):

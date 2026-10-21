@@ -10,6 +10,14 @@ def get_products(category: str = None):
             query = query.where(db.Product.category == category)
         query = session.scalars(query).all()
         return [product_to_dict(p) for p in query]
+    
+def get_sale(id: int):
+    """Retrieves a specific sale by ID from the database."""
+    with db.get_session() as session:
+            sale = session.get(db.Sale, id)
+            if not sale:
+                raise ValueError("Sale not found")
+            return sale
 
 def product_to_dict(product: db.Product) -> dict:
     return {
@@ -35,5 +43,6 @@ def expense_to_dict(expense: db.Expense) -> dict:
         "date": expense.date,
         "amount": expense.amount,
         "description": expense.description
+        
     }
 
