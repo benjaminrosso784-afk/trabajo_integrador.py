@@ -271,8 +271,8 @@ Además, `main.py` no importa nada de lo que separaron: ni `engine`, ni los mode
 **Lo probé sacando los `'''` y agregando los imports.** Aparecen estos errores, que hay que arreglar igual:
 - `GET /products/{id}/sales` da 500: usa `product.sales`, pero `Product` ya no tiene la `relationship`. Agréguenla en `db.py` o filtren con `select(Sale).where(Sale.product_id == id)`.
 - `GET /cash-closing` da 500 cuando hay ventas: suma `s.amount`, y la columna de `Sale` es `total`.
-- El desglose por medio de pago da siempre 0: el seed guarda `efectivo`, `debito` y `transferencia`, y el cierre busca `cash`, `debit` y transfer`. Usen los mismos valores en los dos lados.
-POST /expenses` da 500 con datos válidos: crea `Expense(concept=...)`, pero la columna es `description`.
+- El desglose por medio de pago da siempre 0: el seed guarda `efectivo`, `debito` y `transferencia`, y el cierre busca `cash`, `debit` y `transfer`. Usen los mismos valores en los dos lados.
+- `POST /expenses` da 500 con datos válidos: crea `Expense(concept=...)`, pero la columna es `description`.
 - Siguen pendientes los dos puntos del 08/10: el `POST` acepta `"amount": true` y cualquier texto como fecha.
 - No hay `try/except` en ningún endpoint.
 
@@ -309,3 +309,17 @@ Antes de cada commit: `uvicorn main:app --reload`, abrir `/docs` y probar. Esta 
 **Commits.** Desde el 08/10, todos los commits salvo este último son de la cuenta de Rosso. Si trabajan juntos, aclárenlo en el mensaje (*pair coding*). En la defensa la nota es grupal y les vamos a preguntar a los dos.
 
 Antes de la defensa, levanten la API con `uvicorn main:app --reload` y prueben los 6 endpoints en `/docs`, en la notebook con la que van a presentar.
+
+**Actualización (21/10, noche):** sacaron los `'''` de `main.py`, y la clave ahora se lee del `.env` (401 sin clave o con clave mala). 👍 La API arranca y tiene las 7 rutas. Lo probé:
+- ✅ `GET /products?category=` y `GET /sales/{id}` (con 404) funcionan.
+- ❌ `GET /products/{id}/sales` da 404 **incluso con el producto 1**, que existe. Llama a `crud.get_product_sales`, que no existe en `crud.py`. El `except:` sin tipo tapa el error y lo convierte en "Product not found".
+- ❌ `GET /expenses` da 500 por lo mismo: `crud.get_expenses` no existe.
+- ❌ `GET /cash-closing` y `POST /expenses` dan 500: usan `Session` y `engine` sin importarlos (`NameError`).
+- Siguen pendientes los tres puntos de arriba:
+  - el cierre suma `s.amount`, y la columna se llama `total`;
+  - los medios de pago no coinciden con el seed;
+  - el `POST` exige `concept` y crea `Expense(concept=...)`, pero la columna es `description`.
+
+**Recomendación:** no usen `except:` solo. Atrapen `OperationalError`, porque si no cualquier error del código se muestra como si fuera "no encontrado" y no se ve dónde está el problema.
+
+> El commit `d05ebe8` volvió a modificar sin querer dos líneas de esta devolución. Ya las restauré. Este archivo es del docente: no lo editen.
