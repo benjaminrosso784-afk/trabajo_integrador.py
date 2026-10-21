@@ -271,8 +271,8 @@ Además, `main.py` no importa nada de lo que separaron: ni `engine`, ni los mode
 **Lo probé sacando los `'''` y agregando los imports.** Aparecen estos errores, que hay que arreglar igual:
 - `GET /products/{id}/sales` da 500: usa `product.sales`, pero `Product` ya no tiene la `relationship`. Agréguenla en `db.py` o filtren con `select(Sale).where(Sale.product_id == id)`.
 - `GET /cash-closing` da 500 cuando hay ventas: suma `s.amount`, y la columna de `Sale` es `total`.
-- El desglose por medio de pago da siempre 0: el seed guarda `efectivo`, `debito` y `transferencia`, y el cierre busca `cash`, `debit` y `transfer`. Usen los mismos valores en los dos lados.
-- `POST /expenses` da 500 con datos válidos: crea `Expense(concept=...)`, pero la columna es `description`.
+- El desglose por medio de pago da siempre 0: el seed guarda `efectivo`, `debito` y `transferencia`, y el cierre busca `cash`, `debit` y transfer`. Usen los mismos valores en los dos lados.
+POST /expenses` da 500 con datos válidos: crea `Expense(concept=...)`, pero la columna es `description`.
 - Siguen pendientes los dos puntos del 08/10: el `POST` acepta `"amount": true` y cualquier texto como fecha.
 - No hay `try/except` en ningún endpoint.
 

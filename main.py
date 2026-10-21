@@ -1,38 +1,44 @@
+import crud
+
 from fastapi import FastAPI , HTTPException, Request
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-app = FastAPI()
+app = FastAPI(
+    
+)
 
-'''
+@app.get("/")
+def welcome():
+    return "Welcome to the API!"
+
+
 @app.get("/products")
 def get_products(category: str = None):
     """Retrieves all products, optionally filtered by category."""
-    with Session(engine) as session:
-        query = select(Product)
-        if category:
-            query = query.where(Product.category.ilike(category))
-        products = session.scalars(query).all()
-        return [product_to_dict(p) for p in products]
+    try:
+        products = crud.get_products(category)
+        return products
+    except:
+        raise HTTPException(status_code=500, detail="Database error")
+        
 
 @app.get("/sales/{id}")
 def get_sale(id: int):
     """Retrieves details of a specific sale by ID or 404 if not found."""
-    with Session(engine) as session:
-        sale = session.get(Sale, id)
-        if not sale:
-            raise HTTPException(status_code=404, detail="Sale not found")
-        return sale_to_dict(sale)
+    try:
+        sale = crud.get_sale(id)
+        return crud.sale_to_dict(sale)
+    except:
+        raise HTTPException(status_code=404, detail="Sale not found")
 
 @app.get("/products/{id}/sales")
 def get_product_sales(id: int):
     """Retrieves all sales associated with a specific product ID."""
-    with Session(engine) as session:
-        product = session.get(Product, id)
-        if not product:
-            raise HTTPException(status_code=404, detail="Product not found")
-        return [sale_to_dict(s) for s in product.sales]
-
+    try:
+        sales = crud.get_product_sales(id)
+        return [crud.sale_to_dict(s) for s in sales]
+    except:
+        raise HTTPException(status_code=404, detail="Product not found or no sales available")
+    
 @app.get("/expenses")
 def get_expenses(date: str = None):
     """Retrieves all expenses, optionally filtered by date (YYYY-MM-DD)."""
@@ -106,4 +112,3 @@ async def create_expense(request: Request):
         session.commit()
         session.refresh(new_expense)
         return expense_to_dict(new_expense)
-'''
