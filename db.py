@@ -25,10 +25,9 @@ class Sale(Base):
     quantity: Mapped[int] = mapped_column(nullable=False)
     payment_method: Mapped[str] = mapped_column(nullable=False)
     total: Mapped[float] = mapped_column(nullable=False)
-
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))    
-
     product: Mapped["Product"] = relationship(back_populates="sales")
+
 class Expense(Base):
     __tablename__ = "expenses"
 

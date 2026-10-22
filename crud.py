@@ -17,7 +17,7 @@ def get_sale(id: int):
             sale = session.get(db.Sale, id)
             if not sale:
                 raise ValueError("Sale not found")
-            return sale
+            return sale_to_dict(sale)
 
 def get_expenses(id: int):
     """Retrieves a specific expenses by ID from the database."""
@@ -27,6 +27,31 @@ def get_expenses(id: int):
             query = query.where(db.Expense.id == id)
         expenses = session.scalars(query).all()
         return [expense_to_dict(e) for e in expenses]
+
+def cash_closing(date: str):
+    "Calculates daily cash closing metrics: total sales, payment method breakdown, total expenses, and net balance."
+    with db.get_session() as session:
+        sales = session.scalars(select(db.Sale).where(db.Sale.date == date)).all()
+        expenses = session.scalars(select(db.Expense).where(db.Expense.date == date)).all()
+
+        total_sales = sum(s.total for s in sales)
+        total_expenses = sum(e.amount for e in expenses)
+
+        by_payment_method = {
+            "cash": round(sum(s.total for s in sales if s.payment_method == "cash"), 2),
+            "debit": round(sum(s.total for s in sales if s.payment_method == "debit"), 2),
+            "transfer": round(sum(s.total for s in sales if s.payment_method == "transfer"), 2)
+        }
+
+        net_balance = total_sales - total_expenses
+
+        return {
+            "date": date,
+            "total_sales": round(total_sales, 2),
+            "by_payment_method": (by_payment_method),
+            "total_expenses": round(total_expenses, 2),
+            "daily_balance": round(net_balance, 2),
+            }
 
 def product_to_dict(product: db.Product) -> dict:
     return {
@@ -43,7 +68,7 @@ def sale_to_dict(sale: db.Sale) -> dict:
         "quantity": sale.quantity,
         "payment method": sale.payment_method,
         "means of payment": sale.payment_method,
-        "total": sale.total,
+        "total": sale.total
     }
 
 def expense_to_dict(expense: db.Expense) -> dict:
