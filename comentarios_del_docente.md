@@ -323,3 +323,37 @@ Antes de la defensa, levanten la API con `uvicorn main:app --reload` y prueben l
 **Recomendación:** no usen `except:` solo. Atrapen `OperationalError`, porque si no cualquier error del código se muestra como si fuera "no encontrado" y no se ve dónde está el problema.
 
 > El commit `d05ebe8` volvió a modificar sin querer dos líneas de esta devolución. Ya las restauré. Este archivo es del docente: no lo editen.
+
+## 22/10
+
+**Lo que hay:** avanzaron bastante. 👍 Lo probé:
+- ✅ `GET /products?category=`, `GET /sales/{id}` (con 404) y `GET /expenses?date=` funcionan.
+- ✅ `GET /cash-closing?date=2026-09-10` da los totales correctos: 18.800 vendido, 9.500 de egresos y saldo de 9.300.
+- ✅ La clave se lee del `.env` (401 sin clave o con clave mala) y el seed no duplica.
+
+**Lo que falta para completar el Nivel A:**
+1. **`GET /products/{id}/sales` da 404 incluso con el producto 1, que existe.** Llama a `crud.get_product_sales`, que **no existe** en `crud.py`, y el `except:` vacío lo tapa como "Product not found". Escriban esa función en `crud.py`: busca las ventas con `Sale.product_id == id` y devuelve `None` si el producto no existe.
+2. **El desglose por medio de pago del cierre da 0.** El seed guarda `efectivo`, `debito` y `transferencia`, y el cierre busca `cash`, `debit` y `transfer`. Usen los mismos valores en los dos lados.
+3. **El alta de egresos está en `POST /product`.** Tiene que ser `POST /expenses`: la ruta de los egresos, no la de productos. La función también se llama `create_product`.
+4. **El modelo `ExpenceCreate` no controla nada**, y probé que se guardan:
+   - un monto negativo (`-5`);
+   - `true` como monto;
+   - `"cualquiera"` como fecha.
+
+   Y si falta `description`, da un error de la base. Con Pydantic se arregla en el modelo:
+   ```python
+   from pydantic import BaseModel, Field, StrictFloat, StrictInt
+
+   class ExpenseCreate(BaseModel):
+       date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+       amount: StrictFloat | StrictInt = Field(gt=0)
+       description: str = Field(min_length=1)
+   ```
+   Lo probé: rechaza el monto negativo, `true`, el texto y la fecha mal escrita. (`Expence` se escribe `Expense`.)
+5. **README:** dice todavía `concept`, y los ejemplos no coinciden con lo que devuelve la API.
+
+**Recomendaciones**
+- No usen `except:` solo. Atrapen `OperationalError` para los errores de base. Hoy un error del código aparece como "no encontrado", y no se ve qué pasa.
+- `sale_to_dict` repite el medio de pago con dos nombres (`"payment method"` y `"means of payment"`). Dejen uno, sin espacios: `"payment_method"`.
+
+**Commits.** Los de esta semana se llaman "casi listo" y son todos de Benjamín. Si trabajan juntos, aclárenlo en el mensaje. En la defensa la nota es grupal.
