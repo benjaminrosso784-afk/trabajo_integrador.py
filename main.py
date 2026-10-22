@@ -39,12 +39,13 @@ def get_product_sales(id: int = None):
         raise HTTPException(status_code=404, detail="Product not found ")
   
 @app.get("/expenses")
-def get_expenses(date: str = None):
+def get_expenses(id: int = None):
     """Retrieves all expenses, optionally filtered by date (YYYY-MM-DD)."""
     try:
-        expenses = crud.get_expenses(date)
-        return [crud.expense_to_dict(e) for e in expenses]
-    except:
+        expenses = crud.get_expenses(id)
+        return expenses
+    except Exception as e:
+        print (str(e))
         raise HTTPException(status_code=500, detail="Database error")
 
 @app.get("/cash-closing")

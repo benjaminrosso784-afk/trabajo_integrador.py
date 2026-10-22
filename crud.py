@@ -19,6 +19,15 @@ def get_sale(id: int):
                 raise ValueError("Sale not found")
             return sale
 
+def get_expenses(id: int):
+    """Retrieves a specific expenses by ID from the database."""
+    with db.get_session() as session:
+        query = select(db.Expense)
+        if id:
+            query = query.where(db.Expense.id == id)
+        expenses = session.scalars(query).all()
+        return [expense_to_dict(e) for e in expenses]
+
 def product_to_dict(product: db.Product) -> dict:
     return {
         "id": product.id,
