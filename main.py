@@ -70,7 +70,7 @@ def cash_closing(date: str):
 @app.post("/product", status_code=201)
 def create_product(expence: ExpenceCreate):
     try:
-        return crud.expence_create(expence_data=expence)
+        return crud.expence_create(expense_data=expence)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as s:

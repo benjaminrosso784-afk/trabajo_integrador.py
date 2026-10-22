@@ -40,9 +40,9 @@ def cash_closing(date: str):
         total_expenses = sum(e.amount for e in expenses)
 
         by_payment_method = {
-            "cash": round(sum(s.total for s in sales if s.payment_method == "cash"), 2),
-            "debit": round(sum(s.total for s in sales if s.payment_method == "debit"), 2),
-            "transfer": round(sum(s.total for s in sales if s.payment_method == "transfer"), 2)
+            "efectivo": round(sum(s.total for s in sales if s.payment_method == "efectivo"), 2),
+            "debito": round(sum(s.total for s in sales if s.payment_method == "debito"), 2),
+            "transferencia": round(sum(s.total for s in sales if s.payment_method == "transferencia"), 2)
         }
 
         net_balance = total_sales - total_expenses
@@ -55,22 +55,22 @@ def cash_closing(date: str):
             "daily_balance": round(net_balance, 2),
             }
 
-def expence_create(expence_data: ExpenceCreate):
+def expense_create(expense_data: ExpenceCreate):
     with db.get_session() as s:
         query = select(db.Expense).where(
-            db.Expense.date == expence_data.date,
-            db.Expense.amount == expence_data.amount,
-            db.Expense.description == expence_data.description
+            db.Expense.date == expense_data.date,
+            db.Expense.amount == expense_data.amount,
+            db.Expense.description == expense_data.description
         )
         existing = s.scalars(query).first()
         
         if existing:
-            raise ValueError("Expence already exist")
+            raise ValueError("Expense already exists  ")
 
         new_expense = db.Expense(
-            date=expence_data.date,
-            amount=expence_data.amount,
-            description=expence_data.description
+            date=expense_data.date,
+            amount=expense_data.amount,
+            description=expense_data.description
         )
         s.add(new_expense)
         s.commit()
@@ -104,4 +104,3 @@ def expense_to_dict(expense: db.Expense) -> dict:
         "description": expense.description
         
     }
-
