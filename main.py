@@ -1,6 +1,6 @@
 import crud
 from security import verify_api_key
-
+from validation import ExpenceCreate
 from fastapi import FastAPI , HTTPException, Request, Depends
 
 app = FastAPI(title="Kiosco API", dependencies=[Depends(verify_api_key)])
@@ -58,9 +58,20 @@ def cash_closing(date: str):
 
     try:
         closing = crud.cash_closing(date)
+        if isinstance(closing, dict) and "error" in closing:
+            raise HTTPException(status_code=404, detail=closing["error"])
+        
         return closing
+    except HTTPException:
+        raise HTTPException(status_code=404, detail="date no found")
     except:
         raise HTTPException(status_code=500, datail="Database error")
 
-
-
+@app.post("/product", status_code=201)
+def create_product(expence: ExpenceCreate):
+    try:
+        return crud.expence_create(expence_data=expence)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as s:
+        raise HTTPException(status_code=400, detail=(f"Server problems: {str(s)}"))

@@ -1,6 +1,8 @@
 import db
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from validation import ExpenceCreate
+
 
 def get_products(category: str = None):
     """Retrieves all products from the database, optionally filtered by category."""
@@ -52,6 +54,29 @@ def cash_closing(date: str):
             "total_expenses": round(total_expenses, 2),
             "daily_balance": round(net_balance, 2),
             }
+
+def expence_create(expence_data: ExpenceCreate):
+    with db.get_session() as s:
+        query = select(db.Expense).where(
+            db.Expense.date == expence_data.date,
+            db.Expense.amount == expence_data.amount,
+            db.Expense.description == expence_data.description
+        )
+        existing = s.scalars(query).first()
+        
+        if existing:
+            raise ValueError("Expence already exist")
+
+        new_expense = db.Expense(
+            date=expence_data.date,
+            amount=expence_data.amount,
+            description=expence_data.description
+        )
+        s.add(new_expense)
+        s.commit()
+        s.refresh(new_expense)
+        return expense_to_dict(new_expense)
+    
 
 def product_to_dict(product: db.Product) -> dict:
     return {
